@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JoinRequestDto } from './dto/join.request.dto';
+import { User } from '../common/decorators/user.decorator';
 
 @Controller('api/users')
 export class UsersController {
@@ -20,8 +21,8 @@ export class UsersController {
 
   // 로그인
   @Post('login')
-  login(@Req() req) {
-    return req.user;
+  login(@User() user) {
+    return user;
   }
 
   // 로그아웃
