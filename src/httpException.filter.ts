@@ -14,10 +14,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const error = exception.getResponse() as
       | { message: any; statusCode: number }
-      | { error: string; statusCode: 400 };
+      | { error: string; statusCode: 400; message: string[] };
 
-    console.log(status, error);
+    // 에러메시지 포멧팅
+    if (typeof error !== 'string' && error.statusCode === 400) {
+      return response.status(status).json({
+        success: false,
+        code: status,
+        data: error.message,
+      });
+    }
 
-    response.status(status).json({ msg: error });
+    response.status(status).json({
+      success: false,
+      code: status,
+      data: error.message,
+    });
   }
 }
