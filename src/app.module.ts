@@ -45,7 +45,7 @@ import { Workspaces } from './entities/Workspaces';
       keepConnectionAlive: true,
       migrations: [__dirname + '/migrations/*.ts'],
       charset: 'utf8mb4',
-      synchronize: true,
+      synchronize: false,
       logging: true,
     }),
   ],
