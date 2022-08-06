@@ -16,6 +16,7 @@ import { Mentions } from './entities/Mentions';
 import { Users } from './entities/Users';
 import { WorkspaceMembers } from './entities/WorkspaceMembers';
 import { Workspaces } from './entities/Workspaces';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { Workspaces } from './entities/Workspaces';
     WorkspacesModule,
     ChannelsModule,
     DmsModule,
+    AuthModule,
     TypeOrmModule.forFeature([Users]),
     TypeOrmModule.forRoot({
       type: 'mysql',
