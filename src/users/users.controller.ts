@@ -25,8 +25,8 @@ export class UsersController {
 
   // 회원가입
   @Post()
-  postUsers(@Body() body: JoinRequestDto) {
-    this.usersService.postUser(body.email, body.nickname, body.password);
+  async join(@Body() body: JoinRequestDto) {
+    await this.usersService.join(body.email, body.nickname, body.password);
   }
 
   // 로그인
