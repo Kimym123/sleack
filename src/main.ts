@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './httpException.filter';
 import { ValidationPipe } from '@nestjs/common';
+// import session from 'express-session';
 import passport from 'passport';
 
 declare const module: any;

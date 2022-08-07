@@ -13,6 +13,8 @@ import { JoinRequestDto } from './dto/join.request.dto';
 import { User } from '../common/decorators/user.decorator';
 import { UndefinedToNullInterceptor } from '../common/interceptors/undefinedToNull.interceptor';
 import { LocalAuthGuard } from '../auth/local-auth.guard';
+import { NotLoggedInGuard } from '../auth/not-logged-in.guard';
+import { LoggedInGuard } from '../auth/logged-in.guard';
 
 @UseInterceptors(UndefinedToNullInterceptor)
 @Controller('api/users')
@@ -26,6 +28,7 @@ export class UsersController {
   }
 
   // 회원가입
+  @UseGuards(new NotLoggedInGuard())
   @Post()
   async join(@Body() body: JoinRequestDto) {
     await this.usersService.join(body.email, body.nickname, body.password);
@@ -39,6 +42,7 @@ export class UsersController {
   }
 
   // 로그아웃
+  @UseGuards(new LoggedInGuard())
   @Post('logout')
   logout(@Req() req, @Res() res) {
     req.logOut();
