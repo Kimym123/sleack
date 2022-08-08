@@ -16,6 +16,7 @@ import { DMs } from './DMs';
 import { Mentions } from './Mentions';
 import { WorkspaceMembers } from './WorkspaceMembers';
 import { Users } from './Users';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 @Index('name', ['name'], { unique: true })
 @Index('url', ['url'], { unique: true })
@@ -25,9 +26,13 @@ export class Workspaces {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
+  @IsString()
+  @IsNotEmpty()
   @Column('varchar', { name: 'name', unique: true, length: 30 })
   name: string;
 
+  @IsString()
+  @IsNotEmpty()
   @Column('varchar', { name: 'url', unique: true, length: 30 })
   url: string;
 

@@ -1,5 +1,8 @@
-import { Controller, Delete, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
 import { WorkspacesService } from './workspaces.service';
+import { User } from '../common/decorators/user.decorator';
+import { Users } from '../entities/Users';
+import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 
 @Controller('workspaces')
 export class WorkspacesController {
@@ -7,11 +10,15 @@ export class WorkspacesController {
 
   // 내 워크스페이스 가져오기
   @Get()
-  getMyWorkspaces() {}
+  getMyWorkspaces(@User() user: Users) {
+    return this.workspacesService.findMyWorkspaces(user.id);
+  }
 
   // 워크스페이스 만들기
   @Post()
-  createWorkspace() {}
+  createWorkspace(@User() user: Users, @Body() body: CreateWorkspaceDto) {
+    return this.workspacesService.createWorkspace(body.name, body.url, user.id);
+  }
 
   // 워크스페이스에 있는 모든 멤버 가져오기
   @Get(':url/members')
