@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { WorkspacesService } from './workspaces.service';
 import { User } from '../common/decorators/user.decorator';
 import { Users } from '../entities/Users';
@@ -22,7 +22,9 @@ export class WorkspacesController {
 
   // 워크스페이스에 있는 모든 멤버 가져오기
   @Get(':url/members')
-  getAllMembersFromWorkspace() {}
+  getAllMembersFromWorkspace(@Param('url') url: string) {
+    return this.workspacesService.getWorkspaceMembers(url);
+  }
 
   // 워크스페이스에 멤버 초대하기
   @Post(':url/members')

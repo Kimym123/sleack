@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Users } from './Users';
 import { Channels } from './Channels';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 @Index('UserId', ['UserId'], {})
 @Index('ChannelId', ['ChannelId'], {})
@@ -18,6 +19,8 @@ export class ChannelChats {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
+  @IsNotEmpty()
+  @IsString()
   @Column('text', { name: 'content' })
   content: string;
 

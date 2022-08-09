@@ -20,6 +20,14 @@ export class UsersService {
 
     private dataSource: DataSource,
   ) {}
+
+  async findByEmail(email: string) {
+    return this.usersRepository.find({
+      where: { email },
+      select: ['id', 'email', 'password'],
+    });
+  }
+
   async join(email: string, nickname: string, password: string) {
     // Validator 을 사용하여 해당 인자가 안들어온 경우에 대해서 필터링을 하였음.
 
@@ -48,6 +56,9 @@ export class UsersService {
         .create();
       workspaceMember.UserId = returned.id;
       workspaceMember.WorkspaceId = 1;
+      await queryRunner.manager
+        .getRepository(WorkspaceMembers)
+        .save(workspaceMember);
 
       await queryRunner.manager.getRepository(ChannelMembers).save({
         UserId: returned.id,

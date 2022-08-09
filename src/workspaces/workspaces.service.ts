@@ -11,7 +11,7 @@ import { Users } from '../entities/Users';
 export class WorkspacesService {
   constructor(
     @InjectRepository(Workspaces)
-    private workspaceRepository: Repository<Workspaces>,
+    private workspacesRepository: Repository<Workspaces>,
 
     @InjectRepository(Channels)
     private channelsRepository: Repository<Channels>,
@@ -26,11 +26,11 @@ export class WorkspacesService {
     private usersRepository: Repository<Users>,
   ) {}
   async findById(id: number) {
-    return this.workspaceRepository.findOne({ where: { id } });
+    return this.workspacesRepository.findOne({ where: { id } });
   }
 
   async findMyWorkspaces(myId: number) {
-    return this.workspaceRepository.find({
+    return this.workspacesRepository.find({
       where: { WorkspaceMembers: [{ UserId: myId }] },
     });
   }
@@ -40,7 +40,7 @@ export class WorkspacesService {
     workspace.name = name;
     workspace.url = url;
     workspace.OwnerId = myId;
-    const returned = await this.workspaceRepository.save(workspace);
+    const returned = await this.workspacesRepository.save(workspace);
 
     const workspaceMember = new WorkspaceMembers();
     workspaceMember.UserId = myId;
@@ -62,17 +62,22 @@ export class WorkspacesService {
     return this.usersRepository
       .createQueryBuilder('user')
       .innerJoin('user.WorkspaceMembers', 'members')
-      .innerJoin('members.Workspace', 'workspace', 'workspace.url = :url', {
+      .innerJoin('members.Workspaces', 'workspace', 'workspace.url = :url', {
         url,
       })
       .getMany();
   }
 
-  async createWorkspaceMembers(url, email) {
-    const workspace = await this.workspaceRepository
-      .createQueryBuilder('workspace')
-      .innerJoinAndSelect('workspace.Channels', 'channels')
-      .getOne();
+  async createWorkspaceMembers(url: string, email: string) {
+    const workspace = await this.workspacesRepository.findOne({
+      where: { url },
+      join: {
+        alias: 'workspace',
+        innerJoinAndSelect: {
+          channels: 'workspace.Channels',
+        },
+      },
+    });
 
     const user = await this.usersRepository.findOne({ where: { email } });
     if (!user) {
