@@ -7,6 +7,7 @@ import { Workspaces } from '../entities/Workspaces';
 import { ChannelChats } from '../entities/ChannelChats';
 import { Users } from '../entities/Users';
 import { EventsGateway } from '../events/events.gateway';
+import { DMs } from '../entities/DMs';
 
 @Injectable()
 export class ChannelsService {
@@ -33,6 +34,7 @@ export class ChannelsService {
     return this.channelsRepository.findOne({ where: { id } });
   }
 
+  // 워크스페이스 채널 모두 가져오기
   async getWorkspaceChannels(url: string, myId: number) {
     return this.channelsRepository
       .createQueryBuilder('channels')
@@ -51,6 +53,7 @@ export class ChannelsService {
       .getMany();
   }
 
+  // 워크스페이스 특정 체널 가져오기
   async getWorkspaceChannel(url: string, name: string) {
     return this.channelsRepository
       .createQueryBuilder('channel')
@@ -77,6 +80,7 @@ export class ChannelsService {
     await this.channelMembersRepository.save(channelMember);
   }
 
+  // 워크스페이스의 채널 멤버 가져오기
   async getWorkspaceChannelMembers(url: string, name: string) {
     return this.usersRepository
       .createQueryBuilder('user')
@@ -87,10 +91,14 @@ export class ChannelsService {
       .getMany();
   }
 
-  async createWorkspaceChannelMembers(url: string, name: string, email) {
+  // 워크스페이스 채널 멤버 초대하기
+  async createWorkspaceChannelMembers(
+    url: string,
+    name: string,
+    email: string,
+  ) {
     const channel = await this.channelsRepository
       .createQueryBuilder('channel')
-      // ###
       .innerJoin('channel.Workspaces', 'workspace', 'workspace.url = :url', {
         url,
       })
@@ -122,22 +130,19 @@ export class ChannelsService {
     perPage: number,
     page: number,
   ) {
-    return (
-      this.channelChatsRepository
-        .createQueryBuilder('channelChats')
-        // ###
-        .innerJoin('channelChats.Channels', 'channel', 'channel.name = :name', {
-          name,
-        })
-        .innerJoin('channel.Workspaces', 'workspace', 'workspace.url = :url', {
-          url,
-        })
-        .innerJoinAndSelect('channelChats.Users', 'user')
-        .orderBy('channelChats.createdAt', 'DESC')
-        .take(perPage)
-        .skip(perPage * (page - 1))
-        .getMany()
-    );
+    return this.channelChatsRepository
+      .createQueryBuilder('channelChats')
+      .innerJoin('channelChats.Channels', 'channel', 'channel.name = :name', {
+        name,
+      })
+      .innerJoin('channel.Workspaces', 'workspace', 'workspace.url = :url', {
+        url,
+      })
+      .innerJoinAndSelect('channelChats.Users', 'user')
+      .orderBy('channelChats.createdAt', 'DESC')
+      .take(perPage)
+      .skip(perPage * (page - 1))
+      .getMany();
   }
 
   async getChannelUnreadsCount(url, name, after) {

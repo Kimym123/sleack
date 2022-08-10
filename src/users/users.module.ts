@@ -12,5 +12,6 @@ import { ChannelMembers } from '../entities/ChannelMembers';
   ],
   controllers: [UsersController],
   providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}

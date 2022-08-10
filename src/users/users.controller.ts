@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
+  NotFoundException,
   Post,
   Req,
   Res,
@@ -15,36 +17,54 @@ import { UndefinedToNullInterceptor } from '../common/interceptors/undefinedToNu
 import { LocalAuthGuard } from '../auth/local-auth.guard';
 import { NotLoggedInGuard } from '../auth/not-logged-in.guard';
 import { LoggedInGuard } from '../auth/logged-in.guard';
+import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Users } from '../entities/Users';
 
+@ApiTags('USERS')
 @UseInterceptors(UndefinedToNullInterceptor)
 @Controller('api/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // 내 정보 가져오기
+  @ApiCookieAuth('connect.sid')
+  @ApiOperation({ summary: '내 정보 가져오기' })
   @Get()
-  getUser(@Req() req) {
-    return req.user;
+  async getMyProfile(@User() user: Users) {
+    return user || false;
   }
 
-  // 회원가입
-  @UseGuards(new NotLoggedInGuard())
+  @ApiOperation({ summary: '회원가입' })
+  @UseGuards(NotLoggedInGuard)
   @Post()
   async join(@Body() body: JoinRequestDto) {
-    await this.usersService.join(body.email, body.nickname, body.password);
+    const user = this.usersService.findByEmail(body.email);
+    if (!user) {
+      throw new NotFoundException();
+    }
+    const result = await this.usersService.join(
+      body.email,
+      body.nickname,
+      body.password,
+    );
+    if (result) {
+      return 'ok';
+    } else {
+      throw new ForbiddenException();
+    }
   }
 
-  // 로그인
-  @UseGuards(new LocalAuthGuard())
+  @ApiOperation({ summary: '로그인' })
+  @UseGuards(LocalAuthGuard)
   @Post('login')
-  login(@User() user) {
+  async login(@User() user: Users) {
     return user;
   }
 
-  // 로그아웃
-  @UseGuards(new LoggedInGuard())
+  @ApiCookieAuth('connect.sid')
+  @ApiOperation({ summary: '로그아웃' })
+  @UseGuards(LoggedInGuard)
   @Post('logout')
-  logout(@Req() req, @Res() res) {
+  async logout(@Req() req, @Res() res) {
     req.logOut();
     res.clearCookie('connect.sid', { httpOnly: true });
     res.send('ok');
