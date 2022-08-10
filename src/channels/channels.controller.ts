@@ -1,7 +1,27 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ChannelsService } from './channels.service';
 import { User } from '../common/decorators/user.decorator';
 import { PostChatDto } from './dto/post-chat.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import multer from 'multer';
+import path from 'path';
+import * as fs from 'fs';
+
+try {
+  fs.readdirSync('uploads');
+} catch (error) {
+  console.error('uploads 폴더가 없어서 uploads 폴더를 생성합니다.');
+  fs.mkdirSync('uploads');
+}
 
 @Controller('api/workspaces/:url/channels')
 export class ChannelsController {
@@ -54,8 +74,34 @@ export class ChannelsController {
   }
 
   // 이미지 업로드 -> 멀터 사용
+  @UseInterceptors(
+    FilesInterceptor('image', 10, {
+      storage: multer.diskStorage({
+        destination(req, file, cb) {
+          cb(null, 'uploads/');
+        },
+        filename(req, file, cb) {
+          const ext = path.extname(file.originalname);
+          cb(null, path.basename(file.originalname, ext) + Date.now() + ext);
+        },
+      }),
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    }),
+  )
   @Post(':name/images')
-  postImages(@Body() body) {}
+  postImages(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Param('url') url: string,
+    @Param('name') name: string,
+    @User() user,
+  ) {
+    return this.channelsService.createWorkspaceChannelImages(
+      url,
+      name,
+      files,
+      user.id,
+    );
+  }
 
   // 카톡처럼 읽지 않은 메시지가 몇개인지 알려주는 기능
   @Get(':name/unreads')
